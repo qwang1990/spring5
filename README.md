@@ -78,9 +78,9 @@ public class NotVeryUsefulAspect {
 > 注意：切面不可再被增强。当class带有@Aspect注解以后，他就不会被auto-proxying了。
 
 ## 声明pointcut
-回忆一下pointcut决定着对那个join points感兴趣，因此也控制了增强执行的时机。Spring AOP值支持方法执行的join point，所以你可以认为pointcut
+回忆一下pointcut决定着对哪个join points感兴趣，因此也控制了增强执行的时机。Spring AOP只支持方法执行的join point，所以你可以认为pointcut
 就是匹配方法的。一个pointcut声明包含两部分:1.签名包含名字和参数，2.一个pointcut表达式，用来决定感兴趣的方法。在@AspectJ注解风格的AOP中，
-签名是有一个普通的方法定义提供的，pointcut表达式是包含在注解里的。
+签名是由一个普通的方法定义提供的，pointcut表达式是包含在注解里的。
 > 为pointcut的方法返回值必须为void
 
 下面这个例子就是一个pointcut，名字为anyOldTransfer，它会匹配所有名为'transfer'的方法
