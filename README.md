@@ -88,7 +88,11 @@ public class NotVeryUsefulAspect {
 @Pointcut("execution(* transfer(..))")// pointcut表达式
 private void anyOldTransfer() {}// 签名
 ```
-pointcut表达式是标准的AspectJ5切点表达式，详情关注:[AspectJ Programming Guide](https://www.eclipse.org/aspectj/doc/released/progguide/index.html)
+pointcut表达式是常规的AspectJ5切点表达式，详情关注:[AspectJ Programming Guide](https://www.eclipse.org/aspectj/doc/released/progguide/index.html)
+
+## 支持的Pointcut选择器
+- execution - 用于匹配方法执行的join points，这个是Spring AOP主要使用的选择器
+- within - 匹配在某个特定类型内的join points（在SpringAOP中值在某个类型中的方法）
 
 
 
