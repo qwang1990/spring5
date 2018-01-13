@@ -90,14 +90,104 @@ private void anyOldTransfer() {}// 签名
 ```
 pointcut表达式是常规的AspectJ5切点表达式，详情关注:[AspectJ Programming Guide](https://www.eclipse.org/aspectj/doc/released/progguide/index.html)
 
-## 支持的Pointcut选择器
+### 支持的Pointcut选择器
 - execution - 用于匹配方法执行的join points，这个是Spring AOP主要使用的选择器
 - within - 匹配在某个特定类型内的join points（在SpringAOP中值在某个类型中的方法）
+- this - 匹配AOP代理是指定类型的实例的所有join points(在SpringAOP中只有方法)
+- target - 匹配目标类型是指定类型的实例的全部join points(在SpringAOP中只有方法)
+- args - 按参数类型匹配
+- @target - 匹配带有指定注解的类
+- @args - 匹配运行时参数有指定注解的类
+- @within - 配置带有指定注解的类型
+- @annotation - 匹配带有指定注解的方法（因为SpringAOP中join point都是方法）
 
 
+因为Spring AOP仅针对方法join point，所以上述选择器的定义范围会比AspectJ中的要窄。另外，AspectJ是type-based的语义，所以this和target
+指向同一个对象(执行该方法的对象)。Spring AOP是proxy-based体系，所以this和target是不同的，this指的是proxy对象，target指的是目标对象。
 
+Spring AOP提供了一个新的pointcut选择器'bean'。它允许你匹配指定名称的spring bean(使用通配符时可以匹配一系列的bean)
+> bean(idOrNameOfBean)
 
+### 组合pointcut表达式
+pointcut表达式可以使用&&，|| 和！组合。它们也可以使用名字被引用。
+```java
+//匹配所有public方法
+@Pointcut("execution(public * *(..))")
+private void anyPublicOperation() {}
 
+//匹配在trading下的所有join point
+@Pointcut("within(com.xyz.someapp.trading..*)")
+private void inTrading() {}
+
+//匹配trading下的所有public方法
+@Pointcut("anyPublicOperation() && inTrading()")
+private void tradingOperation() {}
+```
+像上面那样使用简单的名字来标识负责的pointcut表达式是一种很好的习惯。当使用切点的名字来指代表达式时遵循java可见性规则(private只在同一类型可见，
+protected在继承中可见，public都可见)。可见性不影响切点的匹配。
+
+### 共享的common切点定义
+在一个企业级的应用中，建议定义一个SystemArchitecture切面来声明共享的pointcut
+```java
+package com.xyz.someapp;
+
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+
+@Aspect
+public class SystemArchitecture {
+
+    /**
+     * A join point is in the web layer if the method is defined
+     * in a type in the com.xyz.someapp.web package or any sub-package
+     * under that.
+     */
+    @Pointcut("within(com.xyz.someapp.web..*)")
+    public void inWebLayer() {}
+
+    /**
+     * A join point is in the service layer if the method is defined
+     * in a type in the com.xyz.someapp.service package or any sub-package
+     * under that.
+     */
+    @Pointcut("within(com.xyz.someapp.service..*)")
+    public void inServiceLayer() {}
+
+    /**
+     * A join point is in the data access layer if the method is defined
+     * in a type in the com.xyz.someapp.dao package or any sub-package
+     * under that.
+     */
+    @Pointcut("within(com.xyz.someapp.dao..*)")
+    public void inDataAccessLayer() {}
+
+    /**
+     * A business service is the execution of any method defined on a service
+     * interface. This definition assumes that interfaces are placed in the
+     * "service" package, and that implementation types are in sub-packages.
+     *
+     * If you group service interfaces by functional area (for example,
+     * in packages com.xyz.someapp.abc.service and com.xyz.someapp.def.service) then
+     * the pointcut expression "execution(* com.xyz.someapp..service.*.*(..))"
+     * could be used instead.
+     *
+     * Alternatively, you can write the expression using the 'bean'
+     * PCD, like so "bean(*Service)". (This assumes that you have
+     * named your Spring service beans in a consistent fashion.)
+     */
+    @Pointcut("execution(* com.xyz.someapp..service.*.*(..))")
+    public void businessService() {}
+
+    /**
+     * A data access operation is the execution of any method defined on a
+     * dao interface. This definition assumes that interfaces are placed in the
+     * "dao" package, and that implementation types are in sub-packages.
+     */
+    @Pointcut("execution(* com.xyz.someapp.dao.*.*(..))")
+    public void dataAccessOperation() {}
+
+}
+```
 
 
 
