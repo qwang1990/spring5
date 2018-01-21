@@ -138,57 +138,45 @@ import org.aspectj.lang.annotation.Pointcut;
 public class SystemArchitecture {
 
     /**
-     * A join point is in the web layer if the method is defined
-     * in a type in the com.xyz.someapp.web package or any sub-package
-     * under that.
+     * join point是web层，定义在com.xyz.someapp.web或其子package下的方法
      */
     @Pointcut("within(com.xyz.someapp.web..*)")
     public void inWebLayer() {}
 
     /**
-     * A join point is in the service layer if the method is defined
-     * in a type in the com.xyz.someapp.service package or any sub-package
-     * under that.
+     * join point是服务层，定义在com.xyz.someapp.service或其子packege下的方法
      */
     @Pointcut("within(com.xyz.someapp.service..*)")
     public void inServiceLayer() {}
 
-    /**
-     * A join point is in the data access layer if the method is defined
-     * in a type in the com.xyz.someapp.dao package or any sub-package
-     * under that.
-     */
     @Pointcut("within(com.xyz.someapp.dao..*)")
     public void inDataAccessLayer() {}
 
-    /**
-     * A business service is the execution of any method defined on a service
-     * interface. This definition assumes that interfaces are placed in the
-     * "service" package, and that implementation types are in sub-packages.
-     *
-     * If you group service interfaces by functional area (for example,
-     * in packages com.xyz.someapp.abc.service and com.xyz.someapp.def.service) then
-     * the pointcut expression "execution(* com.xyz.someapp..service.*.*(..))"
-     * could be used instead.
-     *
-     * Alternatively, you can write the expression using the 'bean'
-     * PCD, like so "bean(*Service)". (This assumes that you have
-     * named your Spring service beans in a consistent fashion.)
-     */
     @Pointcut("execution(* com.xyz.someapp..service.*.*(..))")
     public void businessService() {}
 
-    /**
-     * A data access operation is the execution of any method defined on a
-     * dao interface. This definition assumes that interfaces are placed in the
-     * "dao" package, and that implementation types are in sub-packages.
-     */
     @Pointcut("execution(* com.xyz.someapp.dao.*.*(..))")
     public void dataAccessOperation() {}
 
 }
 ```
+定义在上述切面中的切点可以在任何地方被访问到。比如想在服务层做一个事物管理，可以这么写:
+```xml
+aop:config>
+    <aop:advisor
+        pointcut="com.xyz.someapp.SystemArchitecture.businessService()"
+        advice-ref="tx-advice"/>
+</aop:config>
 
+<tx:advice id="tx-advice">
+    <tx:attributes>
+        <tx:method name="*" propagation="REQUIRED"/>
+    </tx:attributes>
+</tx:advice>
+```
+&lt;aop:config&gt; 和 &lt;aop:advisor&gt;元素，transaction元素会在后面讲到。
+
+### 举例
 
 
 
